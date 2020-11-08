@@ -1,0 +1,18 @@
+starting
+
+Statusregister initial:  0
+
+Statusregister after setting mode:  0
+
+Statusregister after setting pins:  0
+
+Statusregister after setting up control register:  0
+
+Statusregister Pre 2xClock Mask setting:  128
+
+Statusregister Configuration:  129
+
+spi configured
+
+display reset done
+

@@ -95,6 +95,8 @@ func (d *Device) Configure(cfg Config) {
 	d.resetPin.High()
 	time.Sleep(150 * time.Millisecond)
 
+	println("display reset done")
+
 	// Common initialization
 	d.Command(SWRESET)
 	time.Sleep(150 * time.Millisecond)
@@ -143,6 +145,7 @@ func (d *Device) Configure(cfg Config) {
 		d.isBGR = true
 		d.InvertColors(true)
 	}
+	println("display config done")
 
 	// common color adjustment
 	d.Command(GMCTRP1)
@@ -180,6 +183,8 @@ func (d *Device) Configure(cfg Config) {
 	d.Data(0x02)
 	d.Data(0x10)
 
+	println("display color correction done")
+
 	d.Command(NORON)
 	time.Sleep(10 * time.Millisecond)
 	d.Command(DISPON)
@@ -191,6 +196,8 @@ func (d *Device) Configure(cfg Config) {
 	}
 
 	d.SetRotation(d.rotation)
+
+	println("display rotation set")
 
 	d.blPin.High()
 }
@@ -254,7 +261,8 @@ func (d *Device) FillRectangle(x, y, width, height int16, c color.RGBA) error {
 		return errors.New("rectangle coordinates outside display area")
 	}
 	d.setWindow(x, y, width, height)
-	c565 := RGBATo565(c)
+
+	c565 := 65535
 	c1 := uint8(c565 >> 8)
 	c2 := uint8(c565)
 
@@ -293,7 +301,7 @@ func (d *Device) FillRectangleWithBuffer(x, y, width, height int16, buffer []col
 	for k > 0 {
 		for i := int16(0); i < d.batchLength; i++ {
 			if offset+i < l {
-				c565 := RGBATo565(buffer[offset+i])
+				c565 := 65535
 				c1 := uint8(c565 >> 8)
 				c2 := uint8(c565)
 				d.batchData[i*2] = c1
@@ -374,6 +382,7 @@ func (d *Device) Data(data uint8) {
 func (d *Device) Tx(data []byte, isCommand bool) {
 	d.dcPin.Set(!isCommand)
 	d.bus.Tx(data, nil)
+
 }
 
 // Size returns the current size of the display.
@@ -405,12 +414,4 @@ func (d *Device) InvertColors(invert bool) {
 // IsBGR changes the color mode (RGB/BGR)
 func (d *Device) IsBGR(bgr bool) {
 	d.isBGR = bgr
-}
-
-// RGBATo565 converts a color.RGBA to uint16 used in the display
-func RGBATo565(c color.RGBA) uint16 {
-	r, g, b, _ := c.RGBA()
-	return uint16((r & 0xF800) +
-		((g & 0xFC00) >> 5) +
-		((b & 0xF800) >> 11))
 }
